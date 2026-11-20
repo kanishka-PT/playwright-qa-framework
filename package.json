@@ -1,0 +1,27 @@
+{
+  "name": "playwright-qa-framework",
+  "version": "1.0.0",
+  "description": "End-to-end UI + API test automation framework with Playwright and TypeScript",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --project=ui-chromium",
+    "test:api": "playwright test --project=api",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:cross": "playwright test --project=ui-chromium --project=ui-firefox",
+    "test:headed": "playwright test --project=ui-chromium --headed",
+    "test:debug": "playwright test --project=ui-chromium --debug",
+    "test:uimode": "playwright test --ui",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit",
+    "codegen": "playwright codegen https://www.saucedemo.com"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0",
+    "ajv": "^8.17.1",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.6.0"
+  }
+}
