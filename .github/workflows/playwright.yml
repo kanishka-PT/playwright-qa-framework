@@ -1,0 +1,47 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '30 2 * * 1-5'   # weekdays 02:30 UTC = 08:00 IST, nightly regression
+  workflow_dispatch:          # "Run workflow" button in GitHub
+    inputs:
+      grep:
+        description: 'Tag to run (@smoke, @regression, @api)'
+        default: '@smoke'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]           # split tests across 2 machines
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox
+      - name: Type check
+        run: npm run typecheck
+      - name: Run tests
+        run: npx playwright test --project=ui-chromium --project=api --grep "${{ github.event.inputs.grep || '' }}" --shard=${{ matrix.shard }}/2
+        env:
+          CI: true
+          # Real projects keep these in Settings > Secrets and variables > Actions
+          UI_PASSWORD: ${{ secrets.UI_PASSWORD || 'secret_sauce' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
